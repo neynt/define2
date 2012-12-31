@@ -33,3 +33,7 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# Generated dictionary files
+*.gz
+*.db
