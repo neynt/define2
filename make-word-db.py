@@ -2,13 +2,14 @@
 import sqlite3
 from urllib.request import urlopen
 import gzip
-import os
+import sys
 
 DEF_FILE = ''
+DB_FILE = 'words.db'
 
 # Prompt user for dictionary choice.
 print("You are about to create a dictionary database.")
-print("Which definition dump do you want to use?")
+print("Which definition dump do you want to download?")
 print(" [1] Just English words (~15MB download, ~100MB installed)")
 print(" [2] ALL the languages! (~50MB download, ~550MB installed)")
 print(" [3] Use existing file")
@@ -35,17 +36,24 @@ if dl:
         f.close()
 
 print("Creating database.")
-conn = sqlite3.connect('words.db')
+# Truncate current database
+open(DB_FILE, 'w').close()
+# Create new database
+conn = sqlite3.connect(DB_FILE)
 c = conn.cursor()
 c.execute("""DROP TABLE IF EXISTS words""")
 c.execute("""CREATE TABLE words (id int, lang text, word text, role text, defn text)""")
 
+# Populate the table with entries.
 with gzip.open(DEF_FILE) as f:
-    # Populate the table with entries.
     print("Inserting definitions into database.")
     for i,l in enumerate(f):
-        if i != 0 and i%100000 == 0:
-            print("%.1f million definitions inserted." % (i/1000000))
+        if i == 100000:
+            print("%.1f million definitions inserted." % (i/1000000), end='')
+            sys.stdout.flush()
+        elif i != 0 and i%100000 == 0:
+            print("\r%.1f million definitions inserted." % (i/1000000), end='')
+            sys.stdout.flush()
         s = str(l, encoding='utf-8')
         c.execute('INSERT INTO words VALUES (?,?,?,?,?)', [i]+s.split('\t'))
     f.close()
