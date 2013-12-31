@@ -35,7 +35,7 @@ def conj_type(code):
     if code[2] == 'pres':
         conj += 'present'
         conj += ' '
-        conj += {'ind':'indicative', 'sub':'subordinate'}[code[3]]
+        conj += {'ind':'indicative', 'sub':'subordinate', 'act':'active'}[code[3]]
     elif code[2] == 'imp':
         conj += 'imperative'
     else:
